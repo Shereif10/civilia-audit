@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Civilia — Frontend Audit</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#04040E;--bg2:#080818;--bg3:#0C0C20;
+  --red:#FF2D2D;--red2:rgba(255,45,45,0.15);
+  --gold:#FFB800;--green:#00E5A0;--blue:#4D9FFF;
+  --white:#FFFFFF;--gray:#3A3A5C;--gray2:#6B6B8E;
+  --light:#C8C8E0;--border:rgba(255,255,255,0.05);
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--white);
+  font-family:'Space Grotesk',sans-serif;
+  overflow-x:hidden;cursor:none;direction:ltr;
+}
+/* ── GLOBAL TEXT DIRECTION FIX ── */
+*{direction:ltr;unicode-bidi:isolate;}
+bdi{unicode-bidi:isolate;display:inline;}
+
+/* ── CANVAS PARTICLES ── */
+#particles{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.6;}
+
+/* ── CURSOR ── */
+#cur{position:fixed;width:10px;height:10px;background:var(--red);
+  border-radius:50%;pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);transition:transform 0.1s;}
+#cur-r{position:fixed;width:32px;height:32px;
+  border:1px solid rgba(255,45,45,0.5);border-radius:50%;
+  pointer-events:none;z-index:9998;transform:translate(-50%,-50%);
+  transition:all 0.35s cubic-bezier(.22,.61,.36,1);}
+
+/* ── PROGRESS ── */
+#prog{position:fixed;top:0;left:0;height:2px;
+  background:linear-gradient(90deg,var(--red),var(--gold),var(--green));
+  z-index:9997;width:0;transition:width 0.15s linear;
+  box-shadow:0 0 10px var(--red);}
+
+/* ── NAV DOTS ── */
+#nav{position:fixed;left:24px;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;gap:8px;z-index:997;}
+.nd{width:4px;height:4px;border-radius:50%;background:var(--gray);
+  cursor:pointer;transition:all 0.4s;}
+.nd.on{background:var(--red);height:24px;border-radius:2px;box-shadow:0 0 8px var(--red);}
+
+/* ── SLIDE COUNTER ── */
+#ctr{position:fixed;bottom:28px;right:36px;
+  font-family:'Space Mono',monospace;font-size:10px;
+  color:var(--gray2);letter-spacing:3px;z-index:997;}
+#ctr em{color:var(--red);font-style:normal;}
+
+/* ══ SECTIONS ══ */
+section{min-height:100vh;position:relative;display:flex;
+  flex-direction:column;justify-content:center;overflow:hidden;z-index:1;}
+.pad{padding:70px 90px 80px;}
+section::before{content:'';position:absolute;inset:0;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),
+    linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:70px 70px;
+  mask-image:radial-gradient(ellipse 75% 75% at 50% 50%,black 30%,transparent 100%);
+  pointer-events:none;z-index:0;}
+.inner{position:relative;z-index:2;}
+
+/* ══ COVER ══ */
+#s1{padding:0;}
+.s1-topbar{position:absolute;top:0;left:0;right:0;padding:24px 90px;
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid var(--border);z-index:3;}
+.s1-topbar span{font-family:'Space Mono',monospace;font-size:10px;
+  letter-spacing:4px;color:var(--gray2);}
+.s1-body{padding:100px 90px;display:flex;flex-direction:column;
+  gap:32px;max-width:1000px;position:relative;z-index:2;}
+.s1-over{font-family:'Space Mono',monospace;font-size:11px;
+  letter-spacing:5px;color:var(--red);display:flex;align-items:center;gap:14px;}
+.s1-over::before{content:'';width:28px;height:1px;background:var(--red);}
+.s1-headline{font-family:'Syne',sans-serif;
+  font-size:clamp(60px,9vw,130px);font-weight:800;line-height:0.88;letter-spacing:-4px;}
+.s1-headline .dim{-webkit-text-stroke:1px rgba(255,255,255,0.12);color:transparent;}
+.s1-headline .red{color:var(--red);}
+.s1-divider{height:1px;background:var(--border);max-width:600px;}
+.s1-bottom{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:28px;}
+.s1-meta{font-size:13px;color:var(--gray2);line-height:2;}
+.s1-meta strong{color:var(--white);}
+.s1-scores{display:flex;gap:2px;}
+.s1-sc{padding:18px 26px;text-align:center;border:1px solid var(--border);transition:border-color 0.3s;}
+.s1-sc:hover{border-color:rgba(255,45,45,0.3);}
+.s1-sc-val{font-family:'Syne',sans-serif;font-size:52px;font-weight:800;line-height:1;}
+.s1-sc-lbl{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gray2);margin-top:4px;}
+.s1-botbar{position:absolute;bottom:0;left:0;right:0;padding:18px 90px;
+  border-top:1px solid var(--border);display:flex;gap:28px;flex-wrap:wrap;z-index:3;}
+.s1-botbar span{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--gray);}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;}
+
+/* ══ SECTION BREAK ══ */
+.sb{min-height:100vh;background:var(--bg);display:flex;align-items:center;
+  justify-content:center;position:relative;overflow:hidden;}
+.sb-bg{position:absolute;font-family:'Syne',sans-serif;
+  font-size:clamp(150px,22vw,320px);font-weight:800;
+  color:rgba(255,255,255,0.02);white-space:nowrap;letter-spacing:10px;
+  top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+.sb-inner{text-align:center;position:relative;z-index:2;}
+.sb-num{font-family:'Space Mono',monospace;font-size:10px;
+  letter-spacing:6px;color:var(--red);margin-bottom:16px;}
+.sb-title{font-family:'Syne',sans-serif;font-size:clamp(56px,9vw,110px);
+  font-weight:800;line-height:0.9;letter-spacing:-2px;}
+.sb-title .out{-webkit-text-stroke:1px rgba(255,255,255,0.12);color:transparent;}
+.sb-line{width:50px;height:2px;background:var(--red);margin:24px auto;box-shadow:0 0 10px var(--red);}
+.sb-sub{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:4px;color:var(--gray2);}
+
+/* ══ SLIDE HEADER ══ */
+.sh{margin-bottom:36px;}
+.sh-over{font-family:'Space Mono',monospace;font-size:10px;
+  letter-spacing:5px;color:var(--red);margin-bottom:8px;display:block;}
+.sh-title{font-family:'Syne',sans-serif;font-size:clamp(30px,4vw,50px);
+  font-weight:800;letter-spacing:-1px;line-height:1;}
+.sh-sub{font-size:13px;color:var(--gray2);margin-top:8px;line-height:1.6;}
+
+/* ══ SCORES ══ */
+.scores-wrap{display:grid;grid-template-columns:1fr 1fr;gap:2px;}
+.sc-col{background:var(--bg2);padding:32px;}
+.sc-col-lbl{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:4px;
+  color:var(--gray2);margin-bottom:20px;display:flex;align-items:center;gap:10px;}
+.sc-col-lbl::after{content:'';flex:1;height:1px;background:var(--border);}
+.sc-items{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.sc-item{background:var(--bg3);padding:20px;transition:transform 0.25s;}
+.sc-item:hover{transform:translateY(-3px);}
+.sc-v{font-family:'Syne',sans-serif;font-size:48px;font-weight:800;line-height:1;margin-bottom:5px;}
+.sc-l{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gray2);}
+.alert{margin-top:10px;padding:12px 16px;font-family:'Space Mono',monospace;
+  font-size:10px;letter-spacing:0.5px;line-height:1.6;}
+.alert.bad{background:rgba(255,45,45,0.06);border-right:2px solid var(--red);color:var(--light);}
+.alert.good{background:rgba(0,229,160,0.06);border-right:2px solid var(--green);color:var(--green);}
+.c-r{color:var(--red);}.c-g{color:var(--green);}.c-o{color:var(--gold);}.c-b{color:var(--blue);}
+
+/* ══ VITALS ══ */
+.vg{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-bottom:2px;}
+.vg2{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-bottom:2px;}
+.vc{background:var(--bg2);padding:32px 28px;position:relative;transition:all 0.3s;}
+.vc:hover{background:var(--bg3);}
+.vc::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;}
+.vc.bad::after{background:var(--red);}.vc.good::after{background:var(--green);}
+.vc-st{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;
+  padding:3px 8px;display:inline-block;margin-bottom:16px;}
+.bad .vc-st{background:rgba(255,45,45,0.1);color:var(--red);border:1px solid rgba(255,45,45,0.3);}
+.good .vc-st{background:rgba(0,229,160,0.1);color:var(--green);border:1px solid rgba(0,229,160,0.3);}
+.vc-v{font-family:'Syne',sans-serif;font-size:64px;font-weight:800;line-height:1;margin-bottom:8px;}
+.bad .vc-v{color:var(--red);}.good .vc-v{color:var(--green);}
+.vc-n{font-size:12px;color:var(--gray2);letter-spacing:1px;}
+.gtm{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;}
+.gtm-c{background:var(--bg2);padding:18px 20px;border-bottom:2px solid var(--gold);}
+.gtm-v{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--gold);line-height:1;margin-bottom:4px;}
+.gtm-l{font-family:'Space Mono',monospace;font-size:9px;color:var(--gray2);letter-spacing:2px;}
+
+/* ══ ROOT CAUSES ══ */
+.causes{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+.cause{background:var(--bg2);padding:30px 26px;position:relative;overflow:hidden;transition:all 0.3s;}
+.cause:hover{background:var(--bg3);transform:translateY(-4px);}
+.cause::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;}
+.cause.crit::before{background:var(--red);}.cause.hi::before{background:var(--gold);}
+.cause-ico{font-size:24px;margin-bottom:14px;display:block;}
+.cause-sv{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;margin-bottom:8px;letter-spacing:-0.5px;}
+.cause.crit .cause-sv{color:var(--red);}.cause.hi .cause-sv{color:var(--gold);}
+.cause-nm{font-size:14px;font-weight:600;margin-bottom:6px;}
+.cause-ds{font-size:11px;color:var(--gray2);line-height:1.8;}
+
+/* ══ UX ISSUES ══ */
+.ux{display:grid;grid-template-columns:1fr 1fr;gap:2px;}
+.ux-i{background:var(--bg2);padding:22px 26px;display:flex;gap:14px;
+  align-items:flex-start;position:relative;overflow:hidden;transition:all 0.3s;}
+.ux-i::before{content:'';position:absolute;top:0;right:0;bottom:0;width:3px;}
+.ux-i.p-c::before{background:var(--red);}.ux-i.p-h::before{background:var(--gold);}
+.ux-i.p-m::before{background:var(--blue);}
+.ux-i:hover{background:var(--bg3);}
+.ux-bd{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;
+  padding:3px 8px;flex-shrink:0;margin-top:2px;}
+.p-c .ux-bd{background:var(--red);color:#fff;}
+.p-h .ux-bd{background:var(--gold);color:#000;}
+.p-m .ux-bd{background:var(--blue);color:#000;}
+.ux-title{font-size:13px;font-weight:600;margin-bottom:5px;}
+.ux-desc{font-size:11px;color:var(--gray2);line-height:1.7;}
+
+/* ══ ACTION PLAN ══ */
+.phases{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+.phase{background:var(--bg2);overflow:hidden;transition:all 0.3s;}
+.phase:hover{background:var(--bg3);}
+.ph-head{padding:22px 26px;position:relative;}
+.ph-n{font-family:'Syne',sans-serif;font-size:70px;font-weight:800;
+  color:rgba(255,255,255,0.04);position:absolute;top:-5px;left:10px;line-height:1;}
+.ph-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;
+  letter-spacing:-0.5px;position:relative;z-index:1;}
+.ph-timing{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;
+  color:rgba(255,255,255,0.4);position:relative;z-index:1;margin-top:4px;}
+.ph-1 .ph-head{background:rgba(255,45,45,0.08);}
+.ph-2 .ph-head{background:rgba(255,184,0,0.07);}
+.ph-3 .ph-head{background:rgba(0,229,160,0.07);}
+.ph-tasks{padding:0 26px 26px;}
+.ph-task{padding:10px 0;font-size:12px;line-height:1.6;
+  border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:flex-start;
+  gap:12px;color:var(--light);}
+.ph-task:last-child{border-bottom:none;}
+.ph-task-text{flex:1;}
+.ph-task-text::before{content:'› ';font-size:14px;}
+.ph-1 .ph-task-text::before{color:var(--red);}
+.ph-2 .ph-task-text::before{color:var(--gold);}
+.ph-3 .ph-task-text::before{color:var(--green);}
+.ph-hrs{font-family:'Space Mono',monospace;font-size:9px;
+  color:var(--gray2);flex-shrink:0;white-space:nowrap;margin-top:2px;}
+.tl{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:2px;}
+.tl-c{background:var(--bg2);padding:14px 20px;
+  display:flex;align-items:center;justify-content:space-between;}
+.tl-l{font-size:11px;color:var(--gray2);}
+.tl-v{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;}
+.ph-1 .tl-v{color:var(--red);}.ph-2 .tl-v{color:var(--gold);}.ph-3 .tl-v{color:var(--green);}
+
+/* ══ RESULTS ══ */
+.res{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-bottom:2px;}
+.res-c{background:var(--bg2);padding:36px 30px;position:relative;overflow:hidden;transition:all 0.3s;}
+.res-c:hover{background:var(--bg3);}
+.res-c::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--green),transparent);}
+.res-b{font-family:'Space Mono',monospace;font-size:11px;
+  color:var(--gray);text-decoration:line-through;margin-bottom:4px;}
+.res-a{font-family:'Syne',sans-serif;font-size:52px;font-weight:800;
+  color:var(--green);line-height:1;margin-bottom:8px;letter-spacing:-1px;}
+.res-l{font-size:14px;font-weight:600;margin-bottom:5px;}
+.res-d{font-size:11px;color:var(--gray2);line-height:1.7;}
+.imp{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;}
+.imp-c{background:var(--bg2);padding:18px 20px;text-align:center;border-top:2px solid var(--green);}
+.imp-v{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--green);}
+.imp-l{font-family:'Space Mono',monospace;font-size:9px;color:var(--gray2);letter-spacing:2px;margin-top:4px;}
+
+/* ══ CLOSING ══ */
+#s8{padding:0;}
+.cl-wrap{display:grid;grid-template-columns:55% 45%;min-height:100vh;}
+.cl-l{padding:80px 70px;display:flex;flex-direction:column;
+  justify-content:space-between;border-right:1px solid var(--border);
+  position:relative;overflow:hidden;}
+.cl-l::before{content:'</>';font-family:'Space Mono',monospace;
+  font-size:clamp(100px,16vw,260px);color:rgba(255,45,45,0.03);
+  position:absolute;bottom:-20px;right:-10px;line-height:1;pointer-events:none;font-weight:700;}
+.cl-tag{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:4px;color:var(--red);}
+.cl-hl{font-family:'Syne',sans-serif;font-size:clamp(50px,7vw,96px);
+  font-weight:800;line-height:0.9;letter-spacing:-3px;position:relative;z-index:1;}
+.cl-hl .dim{-webkit-text-stroke:1px rgba(255,255,255,0.1);color:transparent;}
+.cl-line{width:70px;height:2px;background:linear-gradient(90deg,var(--red),var(--gold));
+  box-shadow:0 0 10px rgba(255,45,45,0.4);position:relative;z-index:1;}
+.cl-by{font-family:'Space Mono',monospace;font-size:11px;
+  color:var(--gray2);line-height:2.2;position:relative;z-index:1;}
+.cl-by strong{color:var(--white);}
+.cl-r{padding:80px 60px;display:flex;flex-direction:column;justify-content:center;gap:10px;}
+.cl-rtitle{font-family:'Space Mono',monospace;font-size:10px;
+  letter-spacing:4px;color:var(--gray2);margin-bottom:6px;}
+.sum{background:var(--bg2);padding:14px 18px;display:flex;align-items:center;
+  justify-content:space-between;border-right:3px solid transparent;transition:all 0.3s;}
+.sum:hover{background:var(--bg3);}
+.sum.r{border-color:var(--red);}.sum.o{border-color:var(--gold);}
+.sum.g{border-color:var(--green);}.sum.b{border-color:var(--blue);}
+.sum-l{font-size:12px;color:var(--light);}
+.sum-v{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;}
+.sum.r .sum-v{color:var(--red);}.sum.o .sum-v{color:var(--gold);}
+.sum.g .sum-v{color:var(--green);}.sum.b .sum-v{color:var(--blue);}
+
+/* ══ GLITCH ══ */
+.glitch{position:relative;display:inline-block;}
+.glitch::before,.glitch::after{content:attr(data-text);position:absolute;inset:0;
+  font-family:inherit;font-size:inherit;font-weight:inherit;letter-spacing:inherit;opacity:0;}
+.glitch::before{color:var(--red);clip-path:polygon(0 0,100% 0,100% 45%,0 45%);transform:translate(-3px,0);}
+.glitch::after{color:var(--blue);clip-path:polygon(0 55%,100% 55%,100% 100%,0 100%);transform:translate(3px,0);}
+.glitch.active::before{animation:gl1 0.3s steps(2) forwards;}
+.glitch.active::after{animation:gl2 0.3s steps(2) forwards;}
+@keyframes gl1{0%{opacity:0.8;transform:translate(-4px,1px);}33%{transform:translate(3px,-2px);}66%{transform:translate(-2px,1px);}100%{opacity:0;transform:translate(0);}}
+@keyframes gl2{0%{opacity:0.8;transform:translate(4px,-1px);}33%{transform:translate(-3px,2px);}66%{transform:translate(2px,-1px);}100%{opacity:0;transform:translate(0);}}
+
+/* ══ CINEMATIC REVEAL ══ */
+.cr{opacity:0;transform:translateY(28px);
+  transition:opacity 0.8s cubic-bezier(.22,.61,.36,1),transform 0.8s cubic-bezier(.22,.61,.36,1);}
+.cr.show{opacity:1;transform:translateY(0);}
+.cr.d1{transition-delay:0.05s;}.cr.d2{transition-delay:0.15s;}
+.cr.d3{transition-delay:0.28s;}.cr.d4{transition-delay:0.42s;}
+
+/* ══ SCAN LINE ══ */
+.scanline{position:fixed;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,rgba(255,45,45,0.15),transparent);
+  z-index:9995;pointer-events:none;animation:scan 6s linear infinite;}
+@keyframes scan{0%{top:0;}100%{top:100vh;}}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:1024px){
+  .pad{padding:50px 40px 60px;}
+  .s1-body{padding:90px 40px;}
+  .s1-topbar,.s1-botbar{padding-left:40px;padding-right:40px;}
+  .scores-wrap,.cl-wrap{grid-template-columns:1fr;}
+  .vg{grid-template-columns:1fr 1fr;}
+  .gtm{grid-template-columns:repeat(3,1fr);}
+  .causes{grid-template-columns:1fr 1fr;}
+  .ux,.phases,.tl,.res{grid-template-columns:1fr;}
+  .imp{grid-template-columns:1fr 1fr;}
+  .cl-l{padding:60px 40px;}.cl-r{padding:40px 40px 60px;}
+  #nav{display:none;}
+}
+@media(max-width:640px){
+  .pad{padding:40px 20px 60px;}
+  #s1{padding:0;}
+  .s1-body{padding:80px 20px;gap:24px;}
+  .s1-topbar{padding:18px 20px;}
+  .s1-botbar{padding:14px 20px;gap:16px;}
+  .s1-headline{font-size:clamp(48px,13vw,80px);letter-spacing:-2px;}
+  .s1-bottom{flex-direction:column;align-items:flex-start;}
+  .s1-scores{flex-wrap:wrap;}
+  .s1-sc{padding:14px 18px;}
+  .s1-sc-val{font-size:40px;}
+  .sb-title{font-size:clamp(44px,12vw,80px);}
+  .sb{min-height:60vh;}
+  .sh-title{font-size:28px;}
+  .scores-wrap{grid-template-columns:1fr;}
+  .sc-items{grid-template-columns:1fr 1fr;gap:8px;}
+  .sc-v{font-size:36px;}
+  .vg{grid-template-columns:1fr;}
+  .vg2{grid-template-columns:1fr 1fr;}
+  .vc-v{font-size:48px;}
+  .gtm{grid-template-columns:repeat(3,1fr);}
+  .gtm-v{font-size:20px;}
+  .causes,.ux,.phases,.tl,.res{grid-template-columns:1fr;}
+  .res-a{font-size:40px;}
+  .imp{grid-template-columns:1fr 1fr;}
+  .cl-wrap{display:flex;flex-direction:column;}
+  .cl-l{padding:50px 20px 36px;border-right:none;border-bottom:1px solid var(--border);}
+  .cl-r{padding:30px 20px 60px;}
+  .cl-hl{font-size:52px;letter-spacing:-2px;}
+  body{cursor:auto;}
+  #cur,#cur-r{display:none;}
+  #ctr{right:16px;bottom:16px;}
+}
+</style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="scanline"></div>
+<div id="cur"></div><div id="cur-r"></div>
+<div id="prog"></div>
+<div id="nav"></div>
+<div id="ctr"><em id="cs">01</em> / 08</div>
+
+<!-- ══════ S1 COVER ══════ -->
+<section id="s1">
+  <div class="orb" style="width:800px;height:800px;background:var(--red);top:-300px;right:-300px;opacity:0.06;"></div>
+  <div class="orb" style="width:500px;height:500px;background:var(--blue);bottom:-200px;left:-150px;opacity:0.05;"></div>
+  <div class="s1-topbar">
+    <span>CIVILIA DEVELOPMENTS</span>
+    <span>FRONTEND AUDIT REPORT</span>
+  </div>
+  <div class="s1-body">
+    <div class="s1-over cr d1">RESPECT AGENCY · PERFORMANCE & UX AUDIT</div>
+    <div class="s1-headline cr d2">
+      <span class="glitch" data-text="Website">Website</span><br>
+      <span class="dim glitch" data-text="Audit">Audit</span><span class="red">.</span>
+    </div>
+    <div class="s1-divider cr d3"></div>
+    <div class="s1-bottom cr d4">
+      <div class="s1-meta">
+        Prepared by: <strong>RESPECT AGENCY</strong><br>
+        Scope: <strong>Performance · Core Web Vitals · UX · Action Plan</strong>
+      </div>
+      <div class="s1-scores">
+        <div class="s1-sc"><div class="s1-sc-val c-r" data-target="59" data-counter>0</div><div class="s1-sc-lbl">MOBILE</div></div>
+        <div class="s1-sc"><div class="s1-sc-val c-g" data-target="97" data-counter>0</div><div class="s1-sc-lbl">DESKTOP</div></div>
+        <div class="s1-sc"><div class="s1-sc-val c-g" data-target="100" data-counter>0</div><div class="s1-sc-lbl">SEO</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="s1-botbar">
+    <span>PageSpeed Insights</span><span>GTmetrix</span>
+    <span>Core Web Vitals</span><span>UX Analysis</span><span>Action Plan</span>
+  </div>
+</section>
+
+<!-- ══════ BREAK 1 ══════ -->
+<section class="sb">
+  <div class="orb" style="width:500px;height:500px;background:var(--red);top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.07;"></div>
+  <div class="sb-bg">01</div>
+  <div class="sb-inner cr">
+    <div class="sb-num">SECTION 01</div>
+    <div class="sb-title"><span class="glitch" data-text="PERFORMANCE">PERFORMANCE</span><br><span class="out">SCORES</span></div>
+    <div class="sb-line"></div>
+    <div class="sb-sub">PAGESPEED · GTMETRIX · CORE WEB VITALS</div>
+  </div>
+</section>
+
+<!-- ══════ S2 SCORES ══════ -->
+<section id="s2" class="pad">
+  <div class="inner">
+    <div class="sh cr d1">
+      <span class="sh-over">PAGESPEED INSIGHTS</span>
+      <div class="sh-title glitch" data-text="Performance Scores">Performance Scores</div>
+      <div class="sh-sub">Mobile vs Desktop — الفرق يكشف مشكلة حقيقية تؤثر على 70%+ من الزوار</div>
+    </div>
+    <div class="scores-wrap cr d2">
+      <div class="sc-col">
+        <div class="sc-col-lbl">📱 MOBILE</div>
+        <div class="sc-items">
+          <div class="sc-item"><div class="sc-v c-o" data-target="59" data-counter>0</div><div class="sc-l">PERFORMANCE</div></div>
+          <div class="sc-item"><div class="sc-v c-g" data-target="94" data-counter>0</div><div class="sc-l">ACCESSIBILITY</div></div>
+          <div class="sc-item"><div class="sc-v c-g" data-target="100" data-counter>0</div><div class="sc-l">BEST PRACTICES</div></div>
+          <div class="sc-item"><div class="sc-v c-g" data-target="100" data-counter>0</div><div class="sc-l">SEO</div></div>
+        </div>
+        <div class="alert bad">⚠ Performance 59 = أبطأ من 60% من المواقع على الموبايل</div>
+      </div>
+      <div class="sc-col">
+        <div class="sc-col-lbl">🖥 DESKTOP</div>
+        <div class="sc-items">
+          <div class="sc-item"><div class="sc-v c-g" data-target="97" data-counter>0</div><div class="sc-l">PERFORMANCE</div></div>
+          <div class="sc-item"><div class="sc-v c-g" data-target="92" data-counter>0</div><div class="sc-l">ACCESSIBILITY</div></div>
+          <div class="sc-item"><div class="sc-v c-g" data-target="96" data-counter>0</div><div class="sc-l">BEST PRACTICES</div></div>
+          <div class="sc-item"><div class="sc-v c-g" data-target="100" data-counter>0</div><div class="sc-l">SEO</div></div>
+        </div>
+        <div class="alert good">✓ Desktop ممتاز — لكن 70% من الزوار على الموبايل</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ S3 VITALS ══════ -->
+<section id="s3" class="pad">
+  <div class="inner">
+    <div class="sh cr d1">
+      <span class="sh-over">CORE WEB VITALS — MOBILE</span>
+      <div class="sh-title glitch" data-text="Metrics Breakdown">Metrics Breakdown</div>
+      <div class="sh-sub">الأرقام الحقيقية التي تحدد تجربة المستخدم على الموبايل</div>
+    </div>
+    <div class="vg cr d2">
+      <div class="vc bad"><div class="vc-st">CRITICAL</div><div class="vc-v">5.0s</div><div class="vc-n">First Contentful Paint</div></div>
+      <div class="vc bad"><div class="vc-st">CRITICAL</div><div class="vc-v">6.9s</div><div class="vc-n">Largest Contentful Paint</div></div>
+      <div class="vc bad"><div class="vc-st">CRITICAL</div><div class="vc-v">8.8s</div><div class="vc-n">Speed Index</div></div>
+    </div>
+    <div class="vg2 cr d3">
+      <div class="vc good"><div class="vc-st">GOOD</div><div class="vc-v">40ms</div><div class="vc-n">Total Blocking Time</div></div>
+      <div class="vc good"><div class="vc-st">GOOD</div><div class="vc-v">0</div><div class="vc-n">Cumulative Layout Shift</div></div>
+    </div>
+    <div class="gtm cr d4">
+      <div class="gtm-c"><div class="gtm-v">B</div><div class="gtm-l">GTMETRIX</div></div>
+      <div class="gtm-c"><div class="gtm-v">81%</div><div class="gtm-l">PERFORMANCE</div></div>
+      <div class="gtm-c"><div class="gtm-v">4.2s</div><div class="gtm-l">FULLY LOADED</div></div>
+      <div class="gtm-c"><div class="gtm-v">1.60MB</div><div class="gtm-l">PAGE SIZE</div></div>
+      <div class="gtm-c"><div class="gtm-v">32</div><div class="gtm-l">REQUESTS</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ S4 ROOT CAUSES ══════ -->
+<section id="s4" class="pad">
+  <div class="inner">
+    <div class="sh cr d1">
+      <span class="sh-over">DIAGNOSTICS</span>
+      <div class="sh-title glitch" data-text="Root Causes">Root Causes</div>
+      <div class="sh-sub">ليه الموقع بطيء على الموبايل — بالأرقام الدقيقة</div>
+    </div>
+    <div class="causes cr d2">
+      <div class="cause crit">
+        <span class="cause-ico">⛔</span>
+        <div class="cause-sv">−5,460ms</div>
+        <div class="cause-nm">Render Blocking</div>
+        <div class="cause-ds">ملفات <bdi>CSS</bdi> و<bdi>JS</bdi> بيتحملوا قبل ما الصفحة تظهر، وده بيأخر أول ظهور بحوالي <bdi>5.4 ثانية</bdi> على الموبايل</div>
+      </div>
+      <div class="cause crit">
+        <span class="cause-ico">⛔</span>
+        <div class="cause-sv">−337 KiB</div>
+        <div class="cause-nm">Unused JavaScript</div>
+        <div class="cause-ds">حوالي <bdi>337 كيلوبايت</bdi> من <bdi>JavaScript</bdi> غير مستخدم لكنه بيتحمل بدون أي فائدة</div>
+      </div>
+      <div class="cause crit">
+        <span class="cause-ico">⛔</span>
+        <div class="cause-sv">−195 KiB</div>
+        <div class="cause-nm">Heavy Images</div>
+        <div class="cause-ds">الصور بتتحمل بالحجم الكامل بدون استخدام <bdi>srcset</bdi> أو <bdi>optimization</bdi> لتقليل الحجم</div>
+      </div>
+      <div class="cause hi">
+        <span class="cause-ico">⚠️</span>
+        <div class="cause-sv">674 KB</div>
+        <div class="cause-nm">Fonts Overload</div>
+        <div class="cause-ds">ملفات الـ <bdi>Fonts</bdi> لوحدها تمثل حوالي <bdi>42%</bdi> من حجم الصفحة بالكامل</div>
+      </div>
+      <div class="cause hi">
+        <span class="cause-ico">⚠️</span>
+        <div class="cause-sv">−57 KiB</div>
+        <div class="cause-nm">Unused CSS</div>
+        <div class="cause-ds">حوالي <bdi>57 كيلوبايت</bdi> من <bdi>CSS</bdi> غير مستخدم وبيزود وقت التحميل بدون فائدة</div>
+      </div>
+      <div class="cause hi">
+        <span class="cause-ico">⚠️</span>
+        <div class="cause-sv">No CDN</div>
+        <div class="cause-nm">No CDN Detected</div>
+        <div class="cause-ds">السيرفر بعيد عن المستخدمين في مصر، واستخدام <bdi>CDN</bdi> هيحسن السرعة بشكل كبير</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ BREAK 2 ══════ -->
+<section class="sb">
+  <div class="orb" style="width:500px;height:500px;background:var(--gold);top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.07;"></div>
+  <div class="sb-bg">02</div>
+  <div class="sb-inner cr">
+    <div class="sb-num">SECTION 02</div>
+    <div class="sb-title"><span class="glitch" data-text="UX">UX</span><br><span class="out">ISSUES</span></div>
+    <div class="sb-line" style="background:var(--gold);box-shadow:0 0 10px var(--gold);"></div>
+    <div class="sb-sub">USER EXPERIENCE · INTERFACE · CONVERSION</div>
+  </div>
+</section>
+
+<!-- ══════ S5 UX ISSUES ══════ -->
+<section id="s5" class="pad">
+  <div class="inner">
+    <div class="sh cr d1">
+      <span class="sh-over">UX ANALYSIS</span>
+      <div class="sh-title glitch" data-text="Experience Issues">Experience Issues</div>
+      <div class="sh-sub">مشاكل بتأثر مباشرة على تجربة المستخدم والـ Conversion</div>
+    </div>
+    <div class="ux cr d2">
+      <div class="ux-i p-c"><div class="ux-bd">CRITICAL</div><div><div class="ux-title">مفيش <bdi>Hero CTA</bdi> واضح</div><div class="ux-desc">الزائر بيفتح الموقع ومش عارف يعمل إيه، مفيش زرار واضح للخطوة التالية</div></div></div>
+      <div class="ux-i p-c"><div class="ux-bd">CRITICAL</div><div><div class="ux-title">الـ <bdi>Counters</bdi> بتظهر <bdi>0+</bdi></div><div class="ux-desc"><bdi>JavaScript Animation</bdi> مكسورة وبتدمر الـ <bdi>Credibility</bdi> فورًا</div></div></div>
+      <div class="ux-i p-c"><div class="ux-bd">CRITICAL</div><div><div class="ux-title">مفيش <bdi>WhatsApp Button</bdi></div><div class="ux-desc">أهم قناة تواصل في السوق المصري غايبة تمامًا من الموقع</div></div></div>
+      <div class="ux-i p-c"><div class="ux-bd">CRITICAL</div><div><div class="ux-title"><bdi>Hero Image</bdi> بحجم <bdi>300×150px</bdi></div><div class="ux-desc">صورة <bdi>Thumbnail</bdi> صغيرة، أول انطباع بصري لا يليق بشركة <bdi>premium</bdi></div></div></div>
+      <div class="ux-i p-h"><div class="ux-bd">HIGH</div><div><div class="ux-title"><bdi>Newsletter Form</bdi> غائب</div><div class="ux-desc">فيه نص <bdi>"Subscribe"</bdi> بس مفيش <bdi>Input Field</bdi> — تجربة مكسورة</div></div></div>
+      <div class="ux-i p-h"><div class="ux-bd">HIGH</div><div><div class="ux-title">خطة الدفع بتعرض 0 سنة</div><div class="ux-desc"><bdi>Payment Plans</bdi> بتعرض <bdi>"0 سنة تقسيط"</bdi> — ده بيطرد المشتري الجاد</div></div></div>
+      <div class="ux-i p-h"><div class="ux-bd">HIGH</div><div><div class="ux-title"><bdi>"Real State"</bdi> بدل <bdi>"Real Estate"</bdi></div><div class="ux-desc">غلطة إملائية في <bdi>section</bdi> كاملة بتأثر على الـ <bdi>Credibility</bdi></div></div></div>
+      <div class="ux-i p-m"><div class="ux-bd">MEDIUM</div><div><div class="ux-title"><bdi>BY:SSD</bdi> في الـ <bdi>Footer</bdi></div><div class="ux-desc">اسم المطور ظاهر للـ <bdi>Client</bdi> وده بيأثر على <bdi>Professionalism</bdi> الشركة</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ BREAK 3 ══════ -->
+<section class="sb">
+  <div class="orb" style="width:500px;height:500px;background:var(--green);top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.07;"></div>
+  <div class="sb-bg">03</div>
+  <div class="sb-inner cr">
+    <div class="sb-num">SECTION 03</div>
+    <div class="sb-title"><span class="glitch" data-text="ACTION">ACTION</span><br><span class="out">PLAN</span></div>
+    <div class="sb-line" style="background:var(--green);box-shadow:0 0 10px var(--green);"></div>
+    <div class="sb-sub">FIXES · TIMELINE · ESTIMATED HOURS</div>
+  </div>
+</section>
+
+<!-- ══════ S6 ACTION PLAN ══════ -->
+<section id="s6" class="pad">
+  <div class="inner">
+    <div class="sh cr d1">
+      <span class="sh-over">ACTION PLAN</span>
+      <div class="sh-title glitch" data-text="Fix Roadmap">Fix Roadmap</div>
+      <div class="sh-sub">3 مراحل — مرتبة حسب الأثر المباشر والأولوية</div>
+    </div>
+    <div class="phases cr d2">
+      <div class="phase ph-1">
+        <div class="ph-head"><div class="ph-n">01</div><div class="ph-title">الانكسارات الحرجة</div><div class="ph-timing">WEEK 1-2 · IMMEDIATE</div></div>
+        <div class="ph-tasks">
+          <div class="ph-task"><span class="ph-task-text">استبدال صورة الهيرو بـ <bdi>Fullscreen 1920×1080</bdi></span><span class="ph-hrs">3 hrs</span></div>
+          <div class="ph-task"><span class="ph-task-text">إصلاح <bdi>Counter Animation</bdi> بـ <bdi>Intersection Observer</bdi></span><span class="ph-hrs">2 hrs</span></div>
+          <div class="ph-task"><span class="ph-task-text">إضافة <bdi>Hero CTA</bdi> في كل الصفحات</span><span class="ph-hrs">1 hr</span></div>
+          <div class="ph-task"><span class="ph-task-text"><bdi>WhatsApp Floating Button</bdi></span><span class="ph-hrs">1 hr</span></div>
+          <div class="ph-task"><span class="ph-task-text"><bdi>Image Optimization + srcset</bdi></span><span class="ph-hrs">3 hrs</span></div>
+          <div class="ph-task"><span class="ph-task-text">ملء بيانات <bdi>Payment Plans</bdi></span><span class="ph-hrs">0.5 hr</span></div>
+          <div class="ph-task"><span class="ph-task-text"><bdi>Fix "Real Estate" Spelling</bdi></span><span class="ph-hrs">0.5 hr</span></div>
+        </div>
+      </div>
+      <div class="phase ph-2">
+        <div class="ph-head"><div class="ph-n">02</div><div class="ph-title">الثقة والتحويل</div><div class="ph-timing">MONTH 1 · MID-TERM</div></div>
+        <div class="ph-tasks">
+          <div class="ph-task"><span class="ph-task-text"><bdi>Newsletter Form</bdi> بالـ <bdi>Footer</bdi></span><span class="ph-hrs">2 hrs</span></div>
+          <div class="ph-task"><span class="ph-task-text"><bdi>Mobile Responsiveness Audit</bdi></span><span class="ph-hrs">4 hrs</span></div>
+          <div class="ph-task"><span class="ph-task-text"><bdi>Sticky CTA Bar</bdi> في كل الصفحات</span><span class="ph-hrs">2 hrs</span></div>
+          <div class="ph-task"><span class="ph-task-text"><bdi>Footer Cleanup</bdi></span><span class="ph-hrs">0.5 hr</span></div>
+          <div class="ph-task"><span class="ph-task-text">توحيد نظام الأزرار والألوان</span><span class="ph-hrs">3 hrs</span></div>
+          <div class="ph-task"><span class="ph-task-text"><bdi>Privacy Policy Page</bdi></span><span class="ph-hrs">1 hr</span></div>
+        </div>
+      </div>
+      <div class="phase ph-3">
+        <div class="ph-head"><div class="ph-n">03</div><div class="ph-title">الأداء والمستقبل</div><div class="ph-timing">MONTH 2-3 · LONG-TERM</div></div>
+        <div class="ph-tasks">
+          <div class="ph-task"><span class="ph-task-text"><bdi>Render Blocking Fix</bdi></span><span class="ph-hrs">3 hrs</span></div>
+          <div class="ph-task"><span class="ph-task-text"><bdi>JS Tree-shaking & Cleanup</bdi></span><span class="ph-hrs">3 hrs</span></div>
+          <div class="ph-task"><span class="ph-task-text"><bdi>Schema Markup JSON-LD</bdi></span><span class="ph-hrs">2 hrs</span></div>
+          <div class="ph-task"><span class="ph-task-text"><bdi>CDN Setup</bdi></span><span class="ph-hrs">2 hrs</span></div>
+          <div class="ph-task"><span class="ph-task-text"><bdi>Font Subsetting</bdi></span><span class="ph-hrs">2 hrs</span></div>
+          <div class="ph-task"><span class="ph-task-text"><bdi>Mega Menu</bdi> للمشاريع القادمة</span><span class="ph-hrs">4 hrs</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="tl cr d3">
+      <div class="tl-c ph-1"><span class="tl-l">Phase 1 — Total</span><span class="tl-v">~11.5 hrs</span></div>
+      <div class="tl-c ph-2"><span class="tl-l">Phase 2 — Total</span><span class="tl-v">~12.5 hrs</span></div>
+      <div class="tl-c ph-3"><span class="tl-l">Phase 3 — Total</span><span class="tl-v">~16 hrs</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ S7 RESULTS ══════ -->
+<section id="s7" class="pad">
+  <div class="inner">
+    <div class="sh cr d1">
+      <span class="sh-over">EXPECTED OUTCOMES</span>
+      <div class="sh-title glitch" data-text="Expected Results">Expected Results</div>
+      <div class="sh-sub">النتايج المتوقعة بعد تطبيق الـ Action Plan</div>
+    </div>
+    <div class="res cr d2">
+      <div class="res-c"><div class="res-b">59 / 100</div><div class="res-a" data-target="85" data-counter>0</div><div class="res-l">Mobile Performance Score</div><div class="res-d">بعد <bdi>Image Optimization + Render Blocking Fix + JS Cleanup</bdi></div></div>
+      <div class="res-c"><div class="res-b">6.9s LCP</div><div class="res-a">2.5s</div><div class="res-l">Largest Contentful Paint</div><div class="res-d">بعد تحسين الصور وإصلاح الـ <bdi>Render Blocking Requests</bdi></div></div>
+      <div class="res-c"><div class="res-b">4.2s Load</div><div class="res-a">2.0s</div><div class="res-l">Fully Loaded Time</div><div class="res-d"><bdi>GTmetrix</bdi> بعد <bdi>CDN + Font Optimization + JS Cleanup</bdi></div></div>
+      <div class="res-c"><div class="res-b">No Touch Points</div><div class="res-a">+Leads</div><div class="res-l">Direct Contact Channels</div><div class="res-d"><bdi>WhatsApp Button + Hero CTA</bdi> = قناة تواصل مع كل زائر</div></div>
+    </div>
+    <div class="imp cr d3">
+      <div class="imp-c"><div class="imp-v">59→85+</div><div class="imp-l">MOBILE SCORE</div></div>
+      <div class="imp-c"><div class="imp-v">6.9s→2.5s</div><div class="imp-l">LCP MOBILE</div></div>
+      <div class="imp-c"><div class="imp-v">1.6MB→1MB</div><div class="imp-l">PAGE SIZE</div></div>
+      <div class="imp-c"><div class="imp-v">~40hrs</div><div class="imp-l">TOTAL EFFORT</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ S8 CLOSING ══════ -->
+<section id="s8">
+  <div class="orb" style="width:600px;height:600px;background:var(--red);bottom:-200px;right:-200px;opacity:0.06;"></div>
+  <div class="cl-wrap">
+    <div class="cl-l">
+      <div class="cl-tag cr d1">CIVILIA DEVELOPMENTS</div>
+      <div class="cr d2"><div class="cl-hl">LET'S<br>FIX<br><span class="dim">THIS</span></div></div>
+      <div class="cl-line cr d3"></div>
+      <div class="cl-by cr d4">
+        Prepared by: <strong>RESPECT AGENCY</strong><br>
+        For: <strong>CIVILIA Developments</strong><br>
+        Scope: <strong>Performance · UX · Action Plan</strong>
+      </div>
+    </div>
+    <div class="cl-r cr d3">
+      <div class="cl-rtitle">AUDIT SUMMARY</div>
+      <div class="sum r"><span class="sum-l">🔴 Critical Issues</span><span class="sum-v">4</span></div>
+      <div class="sum o"><span class="sum-l">🟠 High Priority</span><span class="sum-v">4</span></div>
+      <div class="sum o"><span class="sum-l">📱 Mobile Performance</span><span class="sum-v">59/100</span></div>
+      <div class="sum r"><span class="sum-l">⏱ LCP Mobile</span><span class="sum-v">6.9s</span></div>
+      <div class="sum o"><span class="sum-l">📦 Page Size</span><span class="sum-v">1.60MB</span></div>
+      <div class="sum g"><span class="sum-l">✅ SEO Score</span><span class="sum-v">100</span></div>
+      <div class="sum g"><span class="sum-l">🖥 Desktop Score</span><span class="sum-v">97/100</span></div>
+      <div class="sum b"><span class="sum-l">⏳ Total Fix Time</span><span class="sum-v">~40hrs</span></div>
+    </div>
+  </div>
+</section>
+
+<script>
+// PARTICLES
+const canvas=document.getElementById('particles'),ctx=canvas.getContext('2d');
+let W,H,particles=[];
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+class Particle{
+  constructor(){this.reset();}
+  reset(){this.x=Math.random()*W;this.y=Math.random()*H;this.size=Math.random()*1.5+0.3;
+    this.speedX=(Math.random()-.5)*.3;this.speedY=(Math.random()-.5)*.3;
+    this.opacity=Math.random()*.5+.1;
+    this.color=Math.random()>.85?'#FF2D2D':Math.random()>.7?'#FFB800':'#4D9FFF';}
+  update(){this.x+=this.speedX;this.y+=this.speedY;
+    if(this.x<0||this.x>W||this.y<0||this.y>H)this.reset();}
+  draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+    ctx.fillStyle=this.color;ctx.globalAlpha=this.opacity;ctx.fill();}
+}
+for(let i=0;i<120;i++)particles.push(new Particle());
+function drawLines(){
+  for(let i=0;i<particles.length;i++)for(let j=i+1;j<particles.length;j++){
+    const dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y;
+    const d=Math.sqrt(dx*dx+dy*dy);
+    if(d<80){ctx.beginPath();ctx.moveTo(particles[i].x,particles[i].y);
+      ctx.lineTo(particles[j].x,particles[j].y);ctx.strokeStyle='#4D9FFF';
+      ctx.globalAlpha=(1-d/80)*.08;ctx.lineWidth=.5;ctx.stroke();}}}
+function animP(){ctx.clearRect(0,0,W,H);particles.forEach(p=>{p.update();p.draw();});drawLines();ctx.globalAlpha=1;requestAnimationFrame(animP);}
+animP();
+
+// CURSOR
+const cur=document.getElementById('cur'),curR=document.getElementById('cur-r');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+(function anim(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;curR.style.left=rx+'px';curR.style.top=ry+'px';requestAnimationFrame(anim);})();
+document.querySelectorAll('.cause,.ux-i,.phase,.res-c,.sum,.sc-item').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cur.style.transform='translate(-50%,-50%) scale(2.5)';curR.style.width='56px';curR.style.height='56px';});
+  el.addEventListener('mouseleave',()=>{cur.style.transform='translate(-50%,-50%) scale(1)';curR.style.width='32px';curR.style.height='32px';});});
+
+// NAV + PROGRESS
+const sections=document.querySelectorAll('section'),navEl=document.getElementById('nav'),prog=document.getElementById('prog'),csEl=document.getElementById('cs');
+sections.forEach((_,i)=>{const d=document.createElement('div');d.className='nd';d.addEventListener('click',()=>sections[i].scrollIntoView({behavior:'smooth'}));navEl.appendChild(d);});
+const dots=document.querySelectorAll('.nd');
+function onScroll(){
+  const st=window.scrollY,dh=document.documentElement.scrollHeight-window.innerHeight;
+  prog.style.width=(st/dh*100)+'%';
+  sections.forEach((s,i)=>{const r=s.getBoundingClientRect();
+    if(r.top<=window.innerHeight*.5&&r.bottom>=window.innerHeight*.5){
+      dots.forEach(d=>d.classList.remove('on'));if(dots[i])dots[i].classList.add('on');
+      const sid=s.getAttribute('id');if(sid&&sid.startsWith('s'))csEl.textContent=sid.replace('s','').padStart(2,'0');}});}
+window.addEventListener('scroll',onScroll,{passive:true});onScroll();
+
+// REVEAL
+const revObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('show');revObs.unobserve(e.target);}});},{threshold:0.12});
+document.querySelectorAll('.cr').forEach(el=>revObs.observe(el));
+
+// COUNTER
+function animateCounter(el,target,duration=1800){
+  let start=null;
+  const step=ts=>{if(!start)start=ts;const p=Math.min((ts-start)/duration,1);
+    const ease=p===1?1:1-Math.pow(2,-10*p);el.textContent=Math.floor(ease*target);
+    if(p<1)requestAnimationFrame(step);else el.textContent=target;};
+  requestAnimationFrame(step);}
+const cntObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){animateCounter(e.target,parseInt(e.target.getAttribute('data-target')));cntObs.unobserve(e.target);}});},{threshold:0.3});
+document.querySelectorAll('[data-counter]').forEach(el=>cntObs.observe(el));
+
+// TYPING
+function typeText(el,text,speed=35){el.textContent='';let i=0;const t=setInterval(()=>{el.textContent+=text[i];i++;if(i>=text.length)clearInterval(t);},speed);}
+const typeObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){typeText(e.target,e.target.getAttribute('data-type'));typeObs.unobserve(e.target);}});},{threshold:0.5});
+document.querySelectorAll('.sh-sub').forEach(el=>{el.setAttribute('data-type',el.textContent.trim());el.textContent='';typeObs.observe(el);});
+
+// GLITCH
+const glitchEls=document.querySelectorAll('.glitch');
+function triggerGlitch(){const el=glitchEls[Math.floor(Math.random()*glitchEls.length)];if(el){el.classList.add('active');setTimeout(()=>el.classList.remove('active'),350);}}
+setInterval(triggerGlitch,2800);
+const glObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){setTimeout(()=>{e.target.classList.add('active');setTimeout(()=>e.target.classList.remove('active'),400);},600);}});},{threshold:0.5});
+glitchEls.forEach(el=>glObs.observe(el));
+</script>
+</body>
+</html>
